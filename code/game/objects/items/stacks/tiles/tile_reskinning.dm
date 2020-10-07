@@ -99,7 +99,7 @@
 			desc = "Dark metal floor tiles."
 			tile_reskin_mode = "dark plasteel"
 		if("Chapel Flooring")
-			turf_type = /turf/open/floor/plasteel/chapel_floor
+			turf_type = /turf/open/floor/plasteel/chapel
 			icon_state = "tile_chapel"
 			desc = "Those very dark floor tiles you find in the chapel a lot."
 			tile_reskin_mode = "chapel"
