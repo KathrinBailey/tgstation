@@ -42,6 +42,8 @@
 /turf/open/floor/plasteel/checker
 	icon_state = "checker"
 
+/turf/open/floor/plasteel/chapel
+	icon_state = "chapel_alt"
 
 /turf/open/floor/plasteel/white
 	icon_state = "white"

@@ -64,3 +64,104 @@
 			turf_type = /turf/open/floor/mineral/titanium/tiled/purple
 			icon_state = "tile_shuttle_old_purple"
 			desc = "Purple titanium floor tiles."
+
+/obj/item/stack/tile/plasteel
+	var/tile_reskin_mode
+	tile_reskin_mode = "plasteel"
+
+/obj/item/stack/tile/plasteel/attack_self(mob/user)
+	var/static/list/choices = list(
+			"Plasteel" = image(icon = 'icons/obj/tiles.dmi', icon_state = "tile_plasteel"),
+			"White Plasteel" = image(icon = 'icons/obj/tiles.dmi', icon_state = "tile_white"),
+			"Dark Plasteel" = image(icon = 'icons/obj/tiles.dmi', icon_state = "tile_dark"),
+			"Chapel Flooring" = image(icon = 'icons/obj/tiles.dmi', icon_state = "tile_chapel"),
+			"Shower" = image(icon = 'icons/obj/tiles.dmi', icon_state = "tile_shower"),
+			"Freezer" = image(icon = 'icons/obj/tiles.dmi', icon_state = "tile_freezer"),
+			"Kitchen" = image(icon = 'icons/obj/tiles.dmi', icon_state = "tile_kitchen"),
+			"Grimy" = image(icon = 'icons/obj/tiles.dmi', icon_state = "tile_grimy"),
+			"Solar Panel" = image(icon = 'icons/obj/tiles.dmi', icon_state = "tile_solar"),
+		)
+	var/choice = show_radial_menu(user, src, choices, radius = 48, require_near = TRUE)
+	switch(choice)
+		if("Plasteel")
+			turf_type = /turf/open/floor/plasteel
+			icon_state = "tile_plasteel"
+			desc = "Metal floor tiles."
+			tile_reskin_mode = "plasteel"
+		if("White Plasteel")
+			turf_type = /turf/open/floor/plasteel/white
+			icon_state = "tile_white"
+			desc = "White metal floor tiles."
+			tile_reskin_mode = "white plasteel"
+		if("Dark Plasteel")
+			turf_type = /turf/open/floor/plasteel/dark
+			icon_state = "tile_dark"
+			desc = "Dark metal floor tiles."
+			tile_reskin_mode = "dark plasteel"
+		if("Chapel Flooring")
+			turf_type = /turf/open/floor/plasteel/chapel_floor
+			icon_state = "tile_chapel"
+			desc = "Those very dark floor tiles you find in the chapel a lot."
+			tile_reskin_mode = "chapel"
+		if("Shower")
+			turf_type = /turf/open/floor/plasteel/showroomfloor
+			icon_state = "tile_shower"
+			desc = "Tiles for showers, bathrooms and wetrooms."
+			tile_reskin_mode = "shower"
+		if("Freezer")
+			turf_type = /turf/open/floor/plasteel/freezer
+			icon_state = "tile_freezer"
+			desc = "High-grip flooring for walk-in freezers and chillers."
+			tile_reskin_mode = "freezer"
+		if("Kitchen")
+			turf_type = /turf/open/floor/plasteel/cafeteria
+			icon_state = "tile_kitchen"
+			desc = "Chequered pattern plasteel tiles."
+			tile_reskin_mode = "kitchen"
+		if("Grimy")
+			turf_type = /turf/open/floor/plasteel/grimy
+			icon_state = "tile_grimy"
+			desc = "I'm sure it'll look nice somewhere?"
+			tile_reskin_mode = "grimy"
+		if("Solar Panel")
+			turf_type = /turf/open/floor/plasteel/airless/solarpanel
+			icon_state = "tile_solar"
+			desc = "Flooring usually placed below solar panels. Using this indoors is an intergalactic fashion crime."
+			tile_reskin_mode = "solar"
+
+/turf/open/floor/plasteel/attackby(obj/item/reskinstack, mob/user, params)
+	if(istype(reskinstack, /obj/item/stack/tile/plasteel))
+		var/obj/item/stack/tile/plasteel/hitfloor = reskinstack
+		switch(hitfloor.tile_reskin_mode)
+			if("plasteel")
+				icon_state = "floor"
+				icon_regular_floor = "floor"
+			if("white plasteel")
+				icon_state = "white"
+				icon_regular_floor = "white"
+			if("dark plasteel")
+				icon_state = "darkfull"
+				icon_regular_floor = "darkfull"
+			if("chapel")
+				icon_state = "chapel_alt"
+				icon_regular_floor = "chapel_alt"
+			if("shower")
+				icon_state = "showroomfloor"
+				icon_regular_floor = "showroomfloor"
+			if("freezer")
+				icon_state = "freezerfloor"
+				icon_regular_floor = "freezerfloor"
+			if("kitchen")
+				icon_state = "cafeteria"
+				icon_regular_floor = "cafeteria"
+			if("grimy")
+				icon_state = "grimy"
+				icon_regular_floor = "grimy"
+			if("solar")
+				icon_state = "solarpanel"
+				icon_regular_floor = "solarpanel"
+			else return
+
+
+
+
