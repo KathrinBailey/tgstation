@@ -112,6 +112,14 @@
 	if(!selected_gas)
 		return
 	var/gas_path = gas_id2path(selected_gas)
+
+	if(!connected_machine.bluespace_network.gases[gas_path])
+		pumping = FALSE
+		selected_gas = null
+		mode = BS_MODE_IDLE
+		update_appearance()
+		return
+
 	connected_machine.bluespace_network.pump_gas_to(internal_tank.air_contents, (tank_filling_amount * 0.01) * 10 * ONE_ATMOSPHERE, gas_path)
 
 /obj/machinery/bluespace_vendor/multitool_act(mob/living/user, obj/item/multitool/multitool)
@@ -183,8 +191,9 @@
 ///Check the price of the current tank, if the user doesn't have the money the gas will be merged back into the network
 /obj/machinery/bluespace_vendor/proc/check_price(mob/user)
 	var/temp_price = 0
-	for(var/gas_id in internal_tank.air_contents.gases)
-		temp_price += internal_tank.air_contents.total_moles_specific(gas_id) * connected_machine.base_prices[gas_id]
+	var/list/gases = internal_tank.air_contents.gases
+	for(var/gas_id in gases)
+		temp_price += gases[gas_id][MOLES] * connected_machine.base_prices[gas_id]
 	gas_price = temp_price
 
 	if(attempt_charge(src, user, gas_price) & COMPONENT_OBJ_CANCEL_CHARGE)
