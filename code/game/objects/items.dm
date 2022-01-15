@@ -5,13 +5,14 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/e
 	name = "item"
 	icon = 'icons/obj/items_and_weapons.dmi'
 	blocks_emissive = EMISSIVE_BLOCK_GENERIC
+	pass_flags_self = PASSITEM
 
 	/* !!!!!!!!!!!!!!! IMPORTANT !!!!!!!!!!!!!!
 
 		IF YOU ADD MORE ICON CRAP TO THIS
 		ENSURE YOU ALSO ADD THE NEW VARS TO CHAMELEON ITEM_ACTION'S update_item() PROC (/datum/action/item_action/chameleon/change/proc/update_item())
 		WASHING MASHINE'S dye_item() PROC (/obj/item/proc/dye_item())
-		AND ALSO TO THE CHANGELING PROFILE DISGUISE SYSTEMS (/datum/changelingprofile / /datum/antagonist/changeling/proc/create_profile() / /proc/changeling_transform())
+		AND ALSO TO THE CHANGELING PROFILE DISGUISE SYSTEMS (/datum/changeling_profile / /datum/antagonist/changeling/proc/create_profile() / /proc/changeling_transform())
 
 		!!!!!!!!!!!!!!! IMPORTANT !!!!!!!!!!!!!! */
 
@@ -28,7 +29,7 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/e
 	var/worn_icon_state
 	///Icon state for the belt overlay, if null the normal icon_state will be used.
 	var/belt_icon_state
-	///Forced mob worn layer instead of the standard preferred ssize.
+	///Forced mob worn layer instead of the standard preferred size.
 	var/alternate_worn_layer
 	///The config type to use for greyscaled worn sprites. Both this and greyscale_colors must be assigned to work.
 	var/greyscale_config_worn
@@ -44,7 +45,7 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/e
 		IF YOU ADD MORE ICON CRAP TO THIS
 		ENSURE YOU ALSO ADD THE NEW VARS TO CHAMELEON ITEM_ACTION'S update_item() PROC (/datum/action/item_action/chameleon/change/proc/update_item())
 		WASHING MASHINE'S dye_item() PROC (/obj/item/proc/dye_item())
-		AND ALSO TO THE CHANGELING PROFILE DISGUISE SYSTEMS (/datum/changelingprofile / /datum/antagonist/changeling/proc/create_profile() / /proc/changeling_transform())
+		AND ALSO TO THE CHANGELING PROFILE DISGUISE SYSTEMS (/datum/changeling_profile / /datum/antagonist/changeling/proc/create_profile() / /proc/changeling_transform())
 
 		!!!!!!!!!!!!!!! IMPORTANT !!!!!!!!!!!!!! */
 
@@ -86,7 +87,16 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/e
 	var/slot_flags = 0
 	pass_flags = PASSTABLE
 	pressure_resistance = 4
+	/// This var exists as a weird proxy "owner" ref
+	/// It's used in a few places. Stop using it, and optimially replace all uses please
 	var/obj/item/master = null
+
+	///Price of an item in a vending machine, overriding the base vending machine price. Define in terms of paycheck defines as opposed to raw numbers.
+	var/custom_price
+	///Price of an item in a vending machine, overriding the premium vending machine price. Define in terms of paycheck defines as opposed to raw numbers.
+	var/custom_premium_price
+	///Whether spessmen with an ID with an age below AGE_MINOR (20 by default) can buy this item
+	var/age_restricted = FALSE
 
 	///flags which determine which body parts are protected from heat. [See here][HEAD]
 	var/heat_protection = 0
@@ -231,7 +241,9 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/e
 		updateEmbedding()
 
 /obj/item/Destroy()
-	item_flags &= ~DROPDEL //prevent reqdels
+	// This var exists as a weird proxy "owner" ref
+	// It's used in a few places. Stop using it, and optimially replace all uses please
+	master = null
 	if(ismob(loc))
 		var/mob/m = loc
 		m.temporarilyRemoveItemFromInventory(src, TRUE)
@@ -401,7 +413,9 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/e
 		affixes.Add(suffixes)
 
 		//admin picks, cleanup the ones we didn't do and handle chosen
-		var/picked_affix_name = input(usr, "Choose an affix to add to [src]...", "Enchant [src]") as null|anything in affixes
+		var/picked_affix_name = tgui_input_list(usr, "Affix to add to [src]", "Enchant [src]", affixes)
+		if(isnull(picked_affix_name))
+			return
 		if(!affixes[picked_affix_name] || QDELETED(src))
 			return
 		var/datum/fantasy_affix/affix = affixes[picked_affix_name]
@@ -492,23 +506,36 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/e
 	return TRUE
 
 /obj/item/attack_paw(mob/user, list/modifiers)
+	. = ..()
+	if(.)
+		return
 	if(!user)
 		return
 	if(anchored)
 		return
 
+	. = TRUE
+
+	if(!(interaction_flags_item & INTERACT_ITEM_ATTACK_HAND_PICKUP)) //See if we're supposed to auto pickup.
+		return
+
+	//If the item is in a storage item, take it out
 	SEND_SIGNAL(loc, COMSIG_TRY_STORAGE_TAKE, src, user.loc, TRUE)
+	if(QDELETED(src)) //moving it out of the storage to the floor destroyed it.
+		return
 
 	if(throwing)
 		throwing.finalize(FALSE)
 	if(loc == user)
-		if(!user.temporarilyRemoveItemFromInventory(src))
+		if(!allow_attack_hand_drop(user) || !user.temporarilyRemoveItemFromInventory(src))
 			return
 
+	. = FALSE
 	pickup(user)
 	add_fingerprint(user)
 	if(!user.put_in_active_hand(src, FALSE, FALSE))
 		user.dropItemToGround(src)
+		return TRUE
 
 /obj/item/attack_alien(mob/user, list/modifiers)
 	var/mob/living/carbon/alien/ayy = user
@@ -552,7 +579,7 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/e
 	for(var/X in actions)
 		var/datum/action/A = X
 		A.Remove(user)
-	if(item_flags & DROPDEL)
+	if(item_flags & DROPDEL && !QDELETED(src))
 		qdel(src)
 	item_flags &= ~IN_INVENTORY
 	SEND_SIGNAL(src, COMSIG_ITEM_DROPPED, user)
@@ -797,8 +824,6 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/e
 		return ..()
 	return 0
 
-attack_basic_mob
-
 /obj/item/burn()
 	if(!QDELETED(src))
 		var/turf/T = get_turf(src)
@@ -1012,7 +1037,7 @@ attack_basic_mob
 	return
 
 /obj/item/proc/unembedded()
-	if(item_flags & DROPDEL)
+	if(item_flags & DROPDEL && !QDELETED(src))
 		qdel(src)
 		return TRUE
 
@@ -1030,7 +1055,7 @@ attack_basic_mob
 
 ///In case we want to do something special (like self delete) upon failing to embed in something.
 /obj/item/proc/failedEmbed()
-	if(item_flags & DROPDEL)
+	if(item_flags & DROPDEL && !QDELETED(src))
 		qdel(src)
 
 ///Called by the carbon throw_item() proc. Returns null if the item negates the throw, or a reference to the thing to suffer the throw else.
@@ -1227,3 +1252,11 @@ attack_basic_mob
 /obj/item/proc/on_offer_taken(mob/living/carbon/offerer, mob/living/carbon/taker)
 	if(SEND_SIGNAL(src, COMSIG_ITEM_OFFER_TAKEN, offerer, taker) & COMPONENT_OFFER_INTERRUPT)
 		return TRUE
+
+/// Special stuff you want to do when an outfit equips this item.
+/obj/item/proc/on_outfit_equip(mob/living/carbon/human/outfit_wearer, visuals_only, item_slot)
+	return
+
+/// Whether or not this item can be put into a storage item through attackby
+/obj/item/proc/attackby_storage_insert(datum/component/storage, atom/storage_holder, mob/user)
+	return TRUE

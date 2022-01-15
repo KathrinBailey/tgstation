@@ -56,21 +56,12 @@
 	///overlays managed by [update_overlays][/atom/proc/update_overlays] to prevent removing overlays that weren't added by the same proc. Single items are stored on their own, not in a list.
 	var/list/managed_overlays
 
-	///Proximity monitor associated with this atom
-	var/datum/proximity_monitor/proximity_monitor
 	///Cooldown tick timer for buckle messages
 	var/buckle_message_cooldown = 0
 	///Last fingerprints to touch this atom
 	var/fingerprintslast
 
 	var/list/filter_data //For handling persistent filters
-
-	///Price of an item in a vending machine, overriding the base vending machine price. Define in terms of paycheck defines as opposed to raw numbers.
-	var/custom_price
-	///Price of an item in a vending machine, overriding the premium vending machine price. Define in terms of paycheck defines as opposed to raw numbers.
-	var/custom_premium_price
-	///Whether spessmen with an ID with an age below AGE_MINOR (20 by default) can buy this item
-	var/age_restricted = FALSE
 
 	//List of datums orbiting this atom
 	var/datum/component/orbiter/orbiters
@@ -92,10 +83,6 @@
 	var/datum/wires/wires = null
 
 	var/list/alternate_appearances
-
-
-	/// Last appearance of the atom for demo saving purposes
-	var/image/demo_last_appearance
 
 	///Light systems, both shouldn't be active at the same time.
 	var/light_system = STATIC_LIGHT
@@ -261,9 +248,6 @@
 			smoothing_flags |= SMOOTH_OBJ
 		SET_BITFLAG_LIST(canSmoothWith)
 
-	// apply materials properly from the default custom_materials value
-	set_custom_materials(custom_materials)
-
 	if(uses_integrity)
 		if (islist(armor))
 			armor = getArmor(arglist(armor))
@@ -272,6 +256,12 @@
 		else if (!istype(armor, /datum/armor))
 			stack_trace("Invalid type [armor.type] found in .armor during /atom Initialize()")
 		atom_integrity = max_integrity
+
+	// apply materials properly from the default custom_materials value
+	// This MUST come after atom_integrity is set above, as if old materials get removed,
+	// atom_integrity is checked against max_integrity and can BREAK the atom.
+	// The integrity to max_integrity ratio is still preserved.
+	set_custom_materials(custom_materials)
 
 	ComponentInitialize()
 	InitializeAIController()
@@ -380,7 +370,7 @@
 		return FALSE
 
 	if(is_reserved_level(current_turf.z))
-		for(var/obj/docking_port/mobile/mobile_docking_port as anything in SSshuttle.mobile)
+		for(var/obj/docking_port/mobile/mobile_docking_port as anything in SSshuttle.mobile_docking_ports)
 			if(mobile_docking_port.launch_status != ENDGAME_TRANSIT)
 				continue
 			for(var/area/shuttle/shuttle_area as anything in mobile_docking_port.shuttle_areas)
@@ -395,7 +385,7 @@
 		return TRUE
 
 	//Check for centcom shuttles
-	for(var/obj/docking_port/mobile/mobile_docking_port as anything in SSshuttle.mobile)
+	for(var/obj/docking_port/mobile/mobile_docking_port as anything in SSshuttle.mobile_docking_ports)
 		if(mobile_docking_port.launch_status == ENDGAME_LAUNCHED)
 			for(var/place as anything in mobile_docking_port.shuttle_areas)
 				var/area/shuttle/shuttle_area = place
@@ -809,12 +799,12 @@
 /**
  * React to being hit by an explosion
  *
- * Default behaviour is to call [contents_explosion][/atom/proc/contents_explosion] and send the [COMSIG_ATOM_EX_ACT] signal
+ * Should be called through the [EX_ACT] wrapper macro.
+ * The wrapper takes care of the [COMSIG_ATOM_EX_ACT] signal.
+ * as well as calling [/atom/proc/contents_explosion].
  */
 /atom/proc/ex_act(severity, target)
 	set waitfor = FALSE
-	contents_explosion(severity, target)
-	SEND_SIGNAL(src, COMSIG_ATOM_EX_ACT, severity, target)
 
 /**
  * React to a hit by a blob objecd
@@ -943,14 +933,6 @@
 	SEND_SIGNAL(src, COMSIG_ATOM_EMAG_ACT, user, emag_card)
 
 /**
- * Respond to a radioactive wave hitting this atom
- *
- * Default behaviour is to send [COMSIG_ATOM_RAD_ACT] and return
- */
-/atom/proc/rad_act(strength)
-	SEND_SIGNAL(src, COMSIG_ATOM_RAD_ACT, strength)
-
-/**
  * Respond to narsie eating our atom
  *
  * Default behaviour is to send [COMSIG_ATOM_NARSIE_ACT] and return
@@ -1020,7 +1002,7 @@
 	return TRUE
 
 ///Get the best place to dump the items contained in the source storage item?
-/atom/proc/get_dumping_location(obj/item/storage/source,mob/user)
+/atom/proc/get_dumping_location()
 	return null
 
 /**
@@ -1164,37 +1146,37 @@
 				set_light(l_range = var_value)
 			else
 				set_light_range(var_value)
-			. =  TRUE
+			. = TRUE
 		if(NAMEOF(src, light_power))
 			if(light_system == STATIC_LIGHT)
 				set_light(l_power = var_value)
 			else
 				set_light_power(var_value)
-			. =  TRUE
+			. = TRUE
 		if(NAMEOF(src, light_color))
 			if(light_system == STATIC_LIGHT)
 				set_light(l_color = var_value)
 			else
 				set_light_color(var_value)
-			. =  TRUE
+			. = TRUE
 		if(NAMEOF(src, light_on))
 			set_light_on(var_value)
-			. =  TRUE
+			. = TRUE
 		if(NAMEOF(src, light_flags))
 			set_light_flags(var_value)
-			. =  TRUE
+			. = TRUE
 		if(NAMEOF(src, smoothing_junction))
 			set_smoothed_icon_state(var_value)
-			. =  TRUE
+			. = TRUE
 		if(NAMEOF(src, opacity))
 			set_opacity(var_value)
-			. =  TRUE
+			. = TRUE
 		if(NAMEOF(src, base_pixel_x))
 			set_base_pixel_x(var_value)
-			. =  TRUE
+			. = TRUE
 		if(NAMEOF(src, base_pixel_y))
 			set_base_pixel_y(var_value)
-			. =  TRUE
+			. = TRUE
 
 	if(!isnull(.))
 		datum_flags |= DF_VAR_EDITED
@@ -1227,8 +1209,8 @@
 	VV_DROPDOWN_OPTION(VV_HK_ADD_REAGENT, "Add Reagent")
 	VV_DROPDOWN_OPTION(VV_HK_TRIGGER_EMP, "EMP Pulse")
 	VV_DROPDOWN_OPTION(VV_HK_TRIGGER_EXPLOSION, "Explosion")
-	VV_DROPDOWN_OPTION(VV_HK_RADIATE, "Radiate")
 	VV_DROPDOWN_OPTION(VV_HK_EDIT_FILTERS, "Edit Filters")
+	VV_DROPDOWN_OPTION(VV_HK_EDIT_COLOR_MATRIX, "Edit Color as Matrix")
 	VV_DROPDOWN_OPTION(VV_HK_ADD_AI, "Add AI controller")
 	if(greyscale_colors)
 		VV_DROPDOWN_OPTION(VV_HK_MODIFY_GREYSCALE, "Modify greyscale colors")
@@ -1275,11 +1257,6 @@
 	if(href_list[VV_HK_TRIGGER_EMP] && check_rights(R_FUN))
 		usr.client.cmd_admin_emp(src)
 
-	if(href_list[VV_HK_RADIATE] && check_rights(R_FUN))
-		var/strength = input(usr, "Choose the radiation strength.", "Choose the strength.") as num|null
-		if(!isnull(strength))
-			AddComponent(/datum/component/radioactive, strength, src)
-
 	if(href_list[VV_HK_SHOW_HIDDENPRINTS] && check_rights(R_ADMIN))
 		usr.client.cmd_show_hiddenprints(src)
 
@@ -1321,12 +1298,16 @@
 	if(href_list[VV_HK_AUTO_RENAME] && check_rights(R_VAREDIT))
 		var/newname = input(usr, "What do you want to rename this to?", "Automatic Rename") as null|text
 		// Check the new name against the chat filter. If it triggers the IC chat filter, give an option to confirm.
-		if(newname && !(is_ic_filtered(newname) && tgui_alert(usr, "Your selected name contains words restricted by IC chat filters. Confirm this new name?", "IC Chat Filter Conflict", list("Confirm", "Cancel")) != "Confirm"))
+		if(newname && !(is_ic_filtered(newname) || is_soft_ic_filtered(newname) && tgui_alert(usr, "Your selected name contains words restricted by IC chat filters. Confirm this new name?", "IC Chat Filter Conflict", list("Confirm", "Cancel")) != "Confirm"))
 			vv_auto_rename(newname)
 
 	if(href_list[VV_HK_EDIT_FILTERS] && check_rights(R_VAREDIT))
 		var/client/C = usr.client
 		C?.open_filter_editor(src)
+
+	if(href_list[VV_HK_EDIT_COLOR_MATRIX] && check_rights(R_VAREDIT))
+		var/client/C = usr.client
+		C?.open_color_matrix_editor(src)
 
 /atom/vv_get_header()
 	. = ..()
@@ -1590,6 +1571,8 @@
 			log_whisper(log_text)
 		if(LOG_EMOTE)
 			log_emote(log_text)
+		if(LOG_RADIO_EMOTE)
+			log_radio_emote(log_text)
 		if(LOG_DSAY)
 			log_dsay(log_text)
 		if(LOG_PDA)
@@ -1635,10 +1618,10 @@
  * * log_globally - boolean checking whether or not we write this log to the log file
  * * forced_by - source that forced the dialogue if any
  */
-/atom/proc/log_talk(message, message_type, tag=null, log_globally=TRUE, forced_by=null)
+/atom/proc/log_talk(message, message_type, tag = null, log_globally = TRUE, forced_by = null, custom_say_emote = null)
 	var/prefix = tag ? "([tag]) " : ""
 	var/suffix = forced_by ? " FORCED by [forced_by]" : ""
-	log_message("[prefix]\"[message]\"[suffix]", message_type, log_globally=log_globally)
+	log_message("[prefix][custom_say_emote ? "*[custom_say_emote]*, " : ""]\"[message]\"[suffix]", message_type, log_globally=log_globally)
 
 /// Helper for logging of messages with only one sender and receiver
 /proc/log_directed_talk(atom/source, atom/target, message, message_type, tag)
@@ -1778,8 +1761,8 @@
 	filter_data = null
 	filters = null
 
-/atom/proc/intercept_zImpact(atom/movable/hitting_atom, levels = 1)
-	. |= SEND_SIGNAL(src, COMSIG_ATOM_INTERCEPT_Z_FALL, hitting_atom, levels)
+/atom/proc/intercept_zImpact(list/falling_movables, levels = 1)
+	. |= SEND_SIGNAL(src, COMSIG_ATOM_INTERCEPT_Z_FALL, falling_movables, levels)
 
 /// Sets the custom materials for an item.
 /atom/proc/set_custom_materials(list/materials, multiplier = 1)
@@ -1957,7 +1940,7 @@
 	if(!forced_gravity.len)
 		SEND_SIGNAL(gravity_turf, COMSIG_TURF_HAS_GRAVITY, src, forced_gravity)
 	if(forced_gravity.len)
-		var/max_grav
+		var/max_grav = forced_gravity[1]
 		for(var/i in forced_gravity)
 			max_grav = max(max_grav, i)
 		return max_grav
@@ -1986,6 +1969,9 @@
  * Override this if you want custom behaviour in whatever gets hit by the rust
  */
 /atom/proc/rust_heretic_act()
+	if(HAS_TRAIT(src, TRAIT_RUSTY))
+		return
+
 	AddElement(/datum/element/rust)
 
 /**
@@ -2050,19 +2036,29 @@
  * Recursive getter method to return a list of all ghosts orbitting this atom
  *
  * This will work fine without manually passing arguments.
+ * * processed - The list of atoms we've already convered
+ * * source - Is this the atom for who we're counting up all the orbiters?
+ * * ignored_stealthed_admins - If TRUE, don't count admins who are stealthmoded and orbiting this
  */
-/atom/proc/get_all_orbiters(list/processed, source = TRUE)
+/atom/proc/get_all_orbiters(list/processed, source = TRUE, ignore_stealthed_admins = TRUE)
 	var/list/output = list()
-	if (!processed)
+	if(!processed)
 		processed = list()
-	if (src in processed)
+	else if(src in processed)
 		return output
-	if (!source)
+
+	if(!source)
 		output += src
+
 	processed += src
-	for (var/atom/atom_orbiter as anything in orbiters?.orbiter_list)
+	for(var/atom/atom_orbiter as anything in orbiters?.orbiter_list)
 		output += atom_orbiter.get_all_orbiters(processed, source = FALSE)
 	return output
+
+/mob/get_all_orbiters(list/processed, source = TRUE, ignore_stealthed_admins = TRUE)
+	if(!source && ignore_stealthed_admins && client?.holder?.fakekey)
+		return list()
+	return ..()
 
 /**
 * Instantiates the AI controller of this atom. Override this if you want to assign variables first.
@@ -2096,17 +2092,25 @@
 
 	return TRUE
 
-//Update the screentip to reflect what we're hoverin over
 /atom/MouseEntered(location, control, params)
-	. = ..()
-	// Statusbar
-	status_bar_set_text(usr, name)
+	SSmouse_entered.hovers[usr.client] = src
+
+/// Fired whenever this atom is the most recent to be hovered over in the tick.
+/// Preferred over MouseEntered if you do not need information such as the position of the mouse.
+/// Especially because this is deferred over a tick, do not trust that `client` is not null.
+/atom/proc/on_mouse_enter(client/client)
+	SHOULD_NOT_SLEEP(TRUE)
+
+	var/mob/user = client?.mob
+
 	// Screentips
-	if(usr?.hud_used)
-		if(!usr.hud_used.screentips_enabled || (flags_1 & NO_SCREENTIPS_1))
-			usr.hud_used.screentip_text.maptext = ""
+	var/datum/hud/active_hud = user?.hud_used
+	if(active_hud)
+		if(!active_hud.screentips_enabled || (flags_1 & NO_SCREENTIPS_1))
+			active_hud.screentip_text.maptext = ""
 		else
-			usr.hud_used.screentip_text.maptext = MAPTEXT("<span style='text-align: center'><span style='font-size: 32px'><span style='color:[usr.hud_used.screentip_color]: 32px'>[name]</span>")
+			//We inline a MAPTEXT() here, because there's no good way to statically add to a string like this
+			active_hud.screentip_text.maptext = "<span class='maptext' style='text-align: center; font-size: 32px; color: [active_hud.screentip_color]'>[name]</span>"
 
 /// Gets a merger datum representing the connected blob of objects in the allowed_types argument
 /atom/proc/GetMergeGroup(id, list/allowed_types)
