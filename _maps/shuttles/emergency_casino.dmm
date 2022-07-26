@@ -10,7 +10,7 @@
 /turf/open/floor/wood,
 /area/shuttle/escape)
 "aj" = (
-/obj/structure/chair/stool/bar/directional/west,
+/obj/structure/chair/stool/bar/directional/east,
 /obj/effect/turf_decal/siding/wood{
 	dir = 4
 	},
@@ -31,7 +31,7 @@
 /turf/open/floor/carpet/royalblue,
 /area/shuttle/escape)
 "bl" = (
-/obj/structure/chair/stool/directional/west,
+/obj/structure/chair/stool/directional/east,
 /obj/machinery/light/directional/west,
 /turf/open/floor/carpet/green,
 /area/shuttle/escape)
@@ -44,7 +44,7 @@
 /obj/effect/turf_decal/siding/wood{
 	dir = 4
 	},
-/obj/structure/chair/stool/bar/directional/west,
+/obj/structure/chair/stool/bar/directional/east,
 /turf/open/floor/wood,
 /area/shuttle/escape)
 "bT" = (
@@ -58,7 +58,7 @@
 /turf/open/floor/carpet/green,
 /area/shuttle/escape)
 "cb" = (
-/obj/structure/chair/stool/bar/directional/south,
+/obj/structure/chair/stool/bar/directional/north,
 /obj/structure/extinguisher_cabinet/directional/west,
 /turf/open/floor/carpet/green,
 /area/shuttle/escape)
@@ -288,9 +288,7 @@
 /obj/structure/chair/comfy/shuttle{
 	dir = 4
 	},
-/obj/structure/sign/warning/vacuum/external{
-	pixel_y = 32
-	},
+/obj/structure/sign/warning/vacuum/external/directional/north,
 /turf/open/floor/mineral/titanium,
 /area/shuttle/escape)
 "iz" = (
@@ -312,7 +310,7 @@
 /turf/open/floor/carpet/green,
 /area/shuttle/escape)
 "iV" = (
-/obj/structure/chair/stool/directional/south,
+/obj/structure/chair/stool/directional/north,
 /obj/structure/window/reinforced/tinted{
 	dir = 4
 	},
@@ -376,7 +374,7 @@
 /turf/open/floor/wood,
 /area/shuttle/escape)
 "kA" = (
-/obj/structure/chair/stool/directional/south,
+/obj/structure/chair/stool/directional/north,
 /obj/structure/window/reinforced{
 	dir = 4
 	},
@@ -385,9 +383,7 @@
 "kM" = (
 /obj/structure/reagent_dispensers/fueltank,
 /obj/effect/turf_decal/delivery,
-/obj/structure/sign/warning/explosives{
-	pixel_y = 32
-	},
+/obj/structure/sign/warning/explosives/directional/north,
 /turf/open/floor/mineral/titanium,
 /area/shuttle/escape)
 "kO" = (
@@ -431,7 +427,7 @@
 /turf/open/floor/mineral/titanium,
 /area/shuttle/escape)
 "ly" = (
-/obj/structure/chair/stool/directional/south,
+/obj/structure/chair/stool/directional/north,
 /turf/open/floor/carpet/green,
 /area/shuttle/escape)
 "lA" = (
@@ -448,7 +444,7 @@
 /turf/open/floor/carpet/royalblue,
 /area/shuttle/escape)
 "lB" = (
-/obj/structure/chair/stool/directional/south,
+/obj/structure/chair/stool/directional/north,
 /obj/structure/window/reinforced{
 	dir = 8
 	},
@@ -458,11 +454,8 @@
 /obj/structure/window/reinforced{
 	dir = 4
 	},
-/obj/machinery/shower{
-	dir = 8;
-	name = "emergency shower";
-	pixel_x = -6;
-	pixel_y = -7
+/obj/machinery/shower/directional/west{
+	name = "emergency shower"
 	},
 /obj/structure/window/reinforced{
 	dir = 1
@@ -529,11 +522,8 @@
 	dir = 4
 	},
 /obj/structure/window/reinforced,
-/obj/machinery/shower{
-	dir = 8;
-	name = "emergency shower";
-	pixel_x = -6;
-	pixel_y = -4
+/obj/machinery/shower/directional/west{
+	name = "emergency shower"
 	},
 /obj/effect/turf_decal/delivery,
 /turf/open/floor/mineral/titanium,
@@ -687,13 +677,17 @@
 	},
 /turf/open/floor/carpet/royalblue,
 /area/shuttle/escape)
+"rH" = (
+/obj/structure/chair/stool/directional/east,
+/turf/open/floor/wood,
+/area/shuttle/escape)
 "sd" = (
 /obj/machinery/door/airlock/security/glass{
-	name = "Brig";
-	req_access_txt = "2"
+	name = "Brig"
 	},
 /obj/item/grown/bananapeel,
 /obj/item/bikehorn,
+/obj/effect/mapping_helpers/airlock/access/all/security/general,
 /turf/open/floor/mineral/plastitanium/red/brig,
 /area/shuttle/escape/brig)
 "sj" = (
@@ -776,9 +770,9 @@
 /area/shuttle/escape)
 "vK" = (
 /obj/machinery/door/airlock/security/glass{
-	name = "Brig";
-	req_access_txt = "2"
+	name = "Brig"
 	},
+/obj/effect/mapping_helpers/airlock/access/all/security/general,
 /turf/open/floor/mineral/plastitanium/red/brig,
 /area/shuttle/escape/brig)
 "vL" = (
@@ -863,9 +857,7 @@
 /turf/open/floor/sepia,
 /area/shuttle/escape)
 "xI" = (
-/obj/structure/sink{
-	dir = 1
-	},
+/obj/structure/sink/directional/north,
 /obj/structure/extinguisher_cabinet/directional/south,
 /turf/open/floor/mineral/titanium/white,
 /area/shuttle/escape)
@@ -878,14 +870,18 @@
 /area/shuttle/escape)
 "ye" = (
 /obj/machinery/door/airlock/command{
-	name = "Pet Daycare";
-	req_access_txt = "19"
+	name = "Pet Daycare"
 	},
+/obj/effect/mapping_helpers/airlock/access/all/command/general,
 /turf/open/floor/mineral/titanium/purple,
 /area/shuttle/escape)
 "yl" = (
-/obj/structure/chair/stool/directional/south,
+/obj/structure/chair/stool/directional/north,
 /obj/item/radio/intercom/directional/west,
+/turf/open/floor/carpet/green,
+/area/shuttle/escape)
+"yo" = (
+/obj/structure/chair/stool/directional/east,
 /turf/open/floor/carpet/green,
 /area/shuttle/escape)
 "yy" = (
@@ -947,10 +943,17 @@
 /turf/open/floor/iron,
 /area/shuttle/escape)
 "AA" = (
-/obj/structure/chair/stool/bar/directional/south,
+/obj/structure/chair/stool/bar/directional/north,
 /obj/effect/turf_decal/siding/wood{
 	dir = 1
 	},
+/turf/open/floor/wood,
+/area/shuttle/escape)
+"AS" = (
+/obj/effect/turf_decal/siding/wood{
+	dir = 4
+	},
+/obj/structure/chair/stool/directional/north,
 /turf/open/floor/wood,
 /area/shuttle/escape)
 "Bf" = (
@@ -985,9 +988,7 @@
 /obj/structure/window/reinforced/tinted{
 	dir = 8
 	},
-/obj/structure/sign/warning/vacuum{
-	pixel_y = 32
-	},
+/obj/structure/sign/warning/vacuum/directional/north,
 /turf/open/floor/iron,
 /area/shuttle/escape)
 "Cz" = (
@@ -1025,9 +1026,9 @@
 /area/shuttle/escape)
 "Ec" = (
 /obj/machinery/door/airlock/command{
-	name = "Casino Office";
-	req_access_txt = "19"
+	name = "Casino Office"
 	},
+/obj/effect/mapping_helpers/airlock/access/all/command/general,
 /turf/open/floor/carpet/green,
 /area/shuttle/escape)
 "Eh" = (
@@ -1080,9 +1081,7 @@
 /obj/structure/window/reinforced/tinted{
 	dir = 4
 	},
-/obj/structure/sign/warning/vacuum{
-	pixel_y = 32
-	},
+/obj/structure/sign/warning/vacuum/directional/north,
 /turf/open/floor/carpet/green,
 /area/shuttle/escape)
 "Fv" = (
@@ -1139,6 +1138,10 @@
 	pixel_y = 6
 	},
 /turf/open/floor/wood,
+/area/shuttle/escape)
+"Hy" = (
+/obj/structure/chair/stool/bar/directional/north,
+/turf/open/floor/carpet/green,
 /area/shuttle/escape)
 "Ih" = (
 /obj/structure/shuttle/engine/propulsion{
@@ -1265,7 +1268,7 @@
 /turf/open/floor/sepia,
 /area/shuttle/escape)
 "NN" = (
-/obj/structure/chair/stool/directional/south,
+/obj/structure/chair/stool/directional/north,
 /obj/effect/turf_decal/siding/thinplating/corner{
 	dir = 1
 	},
@@ -1361,7 +1364,7 @@
 /turf/open/floor/mineral/titanium/white,
 /area/shuttle/escape)
 "PS" = (
-/obj/structure/chair/stool/directional/west,
+/obj/structure/chair/stool/directional/east,
 /obj/item/radio/intercom/directional/west,
 /turf/open/floor/carpet/green,
 /area/shuttle/escape)
@@ -1376,11 +1379,9 @@
 /turf/open/floor/carpet/royalblue,
 /area/shuttle/escape)
 "QY" = (
-/obj/structure/chair/stool/directional/south,
+/obj/structure/chair/stool/directional/north,
 /obj/effect/turf_decal/siding/wood,
-/obj/structure/sign/departments/security{
-	pixel_y = -32
-	},
+/obj/structure/sign/departments/security/directional/south,
 /turf/open/floor/wood,
 /area/shuttle/escape)
 "Ru" = (
@@ -1423,7 +1424,7 @@
 /turf/open/floor/mineral/plastitanium/red/brig,
 /area/shuttle/escape/brig)
 "Tb" = (
-/obj/structure/chair/stool/directional/south,
+/obj/structure/chair/stool/directional/north,
 /obj/effect/turf_decal/siding/wood,
 /obj/machinery/light/directional/south,
 /turf/open/floor/wood,
@@ -1437,6 +1438,13 @@
 /area/shuttle/escape)
 "Uu" = (
 /turf/closed/wall/mineral/titanium,
+/area/shuttle/escape)
+"UA" = (
+/obj/effect/turf_decal/siding/wood{
+	dir = 8
+	},
+/obj/structure/chair/stool/directional/north,
+/turf/open/floor/wood,
 /area/shuttle/escape)
 "Vj" = (
 /obj/machinery/light/directional/north,
@@ -1483,9 +1491,9 @@
 /area/shuttle/escape)
 "Xg" = (
 /obj/machinery/door/airlock/command{
-	name = "Casino Office";
-	req_access_txt = "19"
+	name = "Casino Office"
 	},
+/obj/effect/mapping_helpers/airlock/access/all/command/general,
 /turf/open/floor/mineral/titanium,
 /area/shuttle/escape)
 "Xl" = (
@@ -1521,9 +1529,7 @@
 /turf/open/floor/mineral/titanium,
 /area/shuttle/escape)
 "XW" = (
-/obj/structure/sign/departments/medbay/alt{
-	pixel_y = -32
-	},
+/obj/structure/sign/departments/medbay/alt/directional/south,
 /obj/machinery/light/directional/south,
 /obj/structure/closet/crate/bin,
 /obj/structure/window/reinforced/tinted{
@@ -1749,7 +1755,7 @@ gm
 yc
 YF
 yc
-gm
+Hy
 Wp
 la
 Kx
@@ -1833,7 +1839,7 @@ Lz
 Lz
 qx
 Zj
-qx
+UA
 Lz
 Lz
 Lz
@@ -1855,8 +1861,8 @@ RZ
 RZ
 RZ
 RZ
-kz
-kz
+rH
+rH
 RZ
 Ab
 mz
@@ -1981,8 +1987,8 @@ aS
 Gf
 AA
 RZ
-kz
-kz
+rH
+rH
 RZ
 Ab
 mz
@@ -2043,7 +2049,7 @@ gI
 gI
 jS
 Xv
-jS
+AS
 gI
 gI
 gI
@@ -2086,9 +2092,9 @@ lB
 Wp
 Wp
 Wp
-Ws
-Ws
-Ws
+yo
+yo
+yo
 Wp
 mz
 vZ

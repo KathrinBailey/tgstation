@@ -29,12 +29,6 @@
 		to_chat(src, span_notice("You look at your arm and sigh."))
 		return
 
-	// Special glove functions:
-	// If the gloves do anything, have them return 1 to stop
-	// normal attack_hand() here.
-	var/obj/item/clothing/gloves/G = gloves // not typecast specifically enough in defines
-	if(proximity_flag && istype(G) && G.Touch(A,1,modifiers))
-		return
 	//This signal is needed to prevent gloves of the north star + hulk.
 	if(SEND_SIGNAL(src, COMSIG_HUMAN_EARLY_UNARMED_ATTACK, A, proximity_flag, modifiers) & COMPONENT_CANCEL_ATTACK_CHAIN)
 		return
@@ -70,8 +64,8 @@
 		return interact(user)
 	return FALSE
 
-/atom/proc/can_interact(mob/user)
-	if(!user.can_interact_with(src))
+/atom/proc/can_interact(mob/user, require_adjacent_turf = TRUE)
+	if(!user.can_interact_with(src, interaction_flags_atom & INTERACT_ATOM_ALLOW_USER_LOCATION))
 		return FALSE
 	if((interaction_flags_atom & INTERACT_ATOM_REQUIRES_DEXTERITY) && !ISADVANCEDTOOLUSER(user))
 		to_chat(user, span_warning("You don't have the dexterity to do this!"))
@@ -89,6 +83,7 @@
 
 /atom/ui_status(mob/user)
 	. = ..()
+	//Check if both user and atom are at the same location
 	if(!can_interact(user))
 		. = min(., UI_UPDATE)
 
@@ -114,10 +109,6 @@
 	. = ..()
 	if(.)
 		return
-	if(gloves)
-		var/obj/item/clothing/gloves/G = gloves
-		if(istype(G) && G.Touch(A,0,modifiers)) // for magic gloves
-			return TRUE
 
 	if(isturf(A) && get_dist(src,A) <= 1)
 		Move_Pulled(A)
