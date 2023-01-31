@@ -16,7 +16,7 @@ SUBSYSTEM_DEF(minor_mapping)
 /datum/controller/subsystem/minor_mapping/proc/trigger_migration(num_mice=10)
 	var/list/exposed_wires = find_exposed_wires()
 
-	var/mob/living/simple_animal/mouse/mouse
+	var/mob/living/basic/mouse/mouse
 	var/turf/open/proposed_turf
 
 
@@ -44,7 +44,7 @@ SUBSYSTEM_DEF(minor_mapping)
 		var/turf/T = pick_n_take(turfs)
 		var/obj/item/storage/backpack/satchel/flat/F = new(T)
 
-		SEND_SIGNAL(F, COMSIG_OBJ_HIDE, T.underfloor_accessibility < UNDERFLOOR_VISIBLE)
+		SEND_SIGNAL(F, COMSIG_OBJ_HIDE, T.underfloor_accessibility)
 		amount--
 
 /proc/find_exposed_wires()
@@ -52,7 +52,7 @@ SUBSYSTEM_DEF(minor_mapping)
 
 	var/list/all_turfs
 	for(var/z in SSmapping.levels_by_trait(ZTRAIT_STATION))
-		all_turfs += block(locate(1,1,z), locate(world.maxx,world.maxy,z))
+		all_turfs += Z_TURFS(z)
 	for(var/turf/open/floor/plating/T in all_turfs)
 		if(T.is_blocked_turf())
 			continue
@@ -65,7 +65,7 @@ SUBSYSTEM_DEF(minor_mapping)
 	var/list/suitable = list()
 
 	for(var/z in SSmapping.levels_by_trait(ZTRAIT_STATION))
-		for(var/turf/detected_turf as anything in block(locate(1,1,z), locate(world.maxx,world.maxy,z)))
+		for(var/turf/detected_turf as anything in Z_TURFS(z))
 			if(isfloorturf(detected_turf) && detected_turf.underfloor_accessibility == UNDERFLOOR_HIDDEN)
 				suitable += detected_turf
 
