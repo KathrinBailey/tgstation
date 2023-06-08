@@ -138,7 +138,7 @@
 				if(!user.combat_mode)
 					spawned_mob.faction |= FACTION_NEUTRAL
 				else
-					spawned_mob.faction |= "slime"
+					spawned_mob.faction |= FACTION_SLIME
 				playsound(user, 'sound/effects/splat.ogg', 50, TRUE)
 				user.visible_message(span_warning("[user] spits out [spawned_mob]!"), span_warning("You spit out [spawned_mob]!"))
 				return 600
@@ -233,7 +233,7 @@
 		if(SLIME_ACTIVATE_MAJOR)
 			var/turf/open/T = get_turf(user)
 			if(istype(T))
-				T.atmos_spawn_air("plasma=20")
+				T.atmos_spawn_air("[GAS_PLASMA]=20")
 			to_chat(user, span_warning("You activate [src], and a cloud of plasma bursts out of your skin!"))
 			return 900
 
@@ -339,7 +339,7 @@
 		if(SLIME_ACTIVATE_MAJOR)
 			var/turf/open/T = get_turf(user)
 			if(istype(T))
-				T.atmos_spawn_air("nitrogen=40;TEMP=2.7")
+				T.atmos_spawn_air("[GAS_N2]=40;[TURF_TEMPERATURE(2.7)]")
 			to_chat(user, span_warning("You activate [src], and icy air bursts out of your skin!"))
 			return 900
 
@@ -482,10 +482,10 @@
 			return 450
 
 		if(SLIME_ACTIVATE_MAJOR)
-			to_chat(user, span_warning("You feel your body rapidly crystallizing..."))
+			to_chat(user, span_warning("You feel your body rapidly hardening..."))
 			if(do_after(user, 120, target = user))
 				to_chat(user, span_warning("You feel solid."))
-				user.set_species(pick(/datum/species/golem/adamantine))
+				user.set_species(/datum/species/golem)
 				return
 			to_chat(user, span_notice("You stop feeding [src], and your body returns to its slimelike state."))
 
@@ -572,7 +572,7 @@
 		if(SLIME_ACTIVATE_MAJOR)
 			var/turf/open/T = get_turf(user)
 			if(istype(T))
-				T.atmos_spawn_air("o2=11;n2=41;TEMP=293.15")
+				T.atmos_spawn_air("[GAS_O2]=11;[GAS_N2]=41;[TURF_TEMPERATURE(T20C)]")
 				to_chat(user, span_warning("You activate [src], and fresh air bursts out of your skin!"))
 				return 600
 
@@ -907,7 +907,7 @@
 	resistance_flags = FIRE_PROOF
 	var/uses = 3
 
-/obj/item/slimepotion/fireproof/afterattack(obj/item/clothing/C, mob/user, proximity)
+/obj/item/slimepotion/fireproof/afterattack(obj/item/clothing/clothing, mob/user, proximity)
 	. = ..()
 	if(!proximity)
 		return
@@ -915,19 +915,19 @@
 		qdel(src)
 		return
 	. |= AFTERATTACK_PROCESSED_ITEM
-	if(!istype(C))
+	if(!istype(clothing))
 		to_chat(user, span_warning("The potion can only be used on clothing!"))
 		return
-	if(C.max_heat_protection_temperature >= FIRE_IMMUNITY_MAX_TEMP_PROTECT)
-		to_chat(user, span_warning("The [C] is already fireproof!"))
+	if(clothing.max_heat_protection_temperature >= FIRE_IMMUNITY_MAX_TEMP_PROTECT)
+		to_chat(user, span_warning("The [clothing] is already fireproof!"))
 		return
-	to_chat(user, span_notice("You slather the blue gunk over the [C], fireproofing it."))
-	C.name = "fireproofed [C.name]"
-	C.remove_atom_colour(WASHABLE_COLOUR_PRIORITY)
-	C.add_atom_colour("#000080", FIXED_COLOUR_PRIORITY)
-	C.max_heat_protection_temperature = FIRE_IMMUNITY_MAX_TEMP_PROTECT
-	C.heat_protection = C.body_parts_covered
-	C.resistance_flags |= FIRE_PROOF
+	to_chat(user, span_notice("You slather the blue gunk over the [clothing], fireproofing it."))
+	clothing.name = "fireproofed [clothing.name]"
+	clothing.remove_atom_colour(WASHABLE_COLOUR_PRIORITY)
+	clothing.add_atom_colour("#000080", FIXED_COLOUR_PRIORITY)
+	clothing.max_heat_protection_temperature = FIRE_IMMUNITY_MAX_TEMP_PROTECT
+	clothing.heat_protection = clothing.body_parts_covered
+	clothing.resistance_flags |= FIRE_PROOF
 	uses --
 	if(!uses)
 		qdel(src)
@@ -996,20 +996,18 @@
 	icon = 'icons/obj/medical/chemical.dmi'
 	icon_state = "potgrey"
 
-/obj/item/slimepotion/slime/slimeradio/attack(mob/living/M, mob/user)
-	if(!ismob(M))
+/obj/item/slimepotion/slime/slimeradio/attack(mob/living/radio_head, mob/user)
+	if(!isanimal_or_basicmob(radio_head))
+		to_chat(user, span_warning("[radio_head] is too complex for the potion!"))
 		return
-	if(!isanimal(M))
-		to_chat(user, span_warning("[M] is too complex for the potion!"))
-		return
-	if(M.stat)
-		to_chat(user, span_warning("[M] is dead!"))
+	if(radio_head.stat)
+		to_chat(user, span_warning("[radio_head] is dead!"))
 		return
 
-	to_chat(user, span_notice("You feed the potion to [M]."))
-	to_chat(M, span_notice("Your mind tingles as you are fed the potion. You can hear radio waves now!"))
+	to_chat(user, span_notice("You feed the potion to [radio_head]."))
+	to_chat(radio_head, span_notice("Your mind tingles as you are fed the potion. You can hear radio waves now!"))
 	var/obj/item/implant/radio/slime/imp = new(src)
-	imp.implant(M, user)
+	imp.implant(radio_head, user)
 	qdel(src)
 
 ///Definitions for slime products that don't have anywhere else to go (Floor tiles, blueprints).
@@ -1022,7 +1020,7 @@
 	inhand_icon_state = "tile-bluespace"
 	w_class = WEIGHT_CLASS_NORMAL
 	force = 6
-	mats_per_unit = list(/datum/material/iron=500)
+	mats_per_unit = list(/datum/material/iron=SMALL_MATERIAL_AMOUNT*5)
 	throwforce = 10
 	throw_speed = 3
 	throw_range = 7
@@ -1039,7 +1037,7 @@
 	inhand_icon_state = "tile-sepia"
 	w_class = WEIGHT_CLASS_NORMAL
 	force = 6
-	mats_per_unit = list(/datum/material/iron=500)
+	mats_per_unit = list(/datum/material/iron=SMALL_MATERIAL_AMOUNT*5)
 	throwforce = 10
 	throw_speed = 0.1
 	throw_range = 28
