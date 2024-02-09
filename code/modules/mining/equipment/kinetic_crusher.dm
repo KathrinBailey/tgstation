@@ -113,7 +113,7 @@
 			if((user.dir & backstab_dir) && (L.dir & backstab_dir))
 				backstabbed = TRUE
 				combined_damage += backstab_bonus
-				playsound(user, 'sound/weapons/kenetic_accel.ogg', 100, TRUE) //Seriously who spelled it wrong
+				playsound(user, 'sound/weapons/kinetic_accel.ogg', 100, TRUE) //Seriously who spelled it wrong
 
 			if(!QDELETED(C))
 				C.total_damage += combined_damage
@@ -159,7 +159,7 @@
 	if(!charged)
 		charged = TRUE
 		update_appearance()
-		playsound(src.loc, 'sound/weapons/kenetic_reload.ogg', 60, TRUE)
+		playsound(src.loc, 'sound/weapons/kinetic_reload.ogg', 60, TRUE)
 
 /obj/item/kinetic_crusher/ui_action_click(mob/user, actiontype)
 	set_light_on(!light_on)
@@ -201,7 +201,7 @@
 	hammer_synced = null
 	return ..()
 
-/obj/projectile/destabilizer/on_hit(atom/target, blocked = FALSE)
+/obj/projectile/destabilizer/on_hit(atom/target, blocked = 0, pierce_hit)
 	if(isliving(target))
 		var/mob/living/L = target
 		var/had_effect = (L.has_status_effect(/datum/status_effect/crusher_mark)) //used as a boolean

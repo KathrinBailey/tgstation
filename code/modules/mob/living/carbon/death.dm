@@ -19,7 +19,7 @@
 		BT.on_death()
 
 /mob/living/carbon/proc/inflate_gib() // Plays an animation that makes mobs appear to inflate before finally gibbing
-	addtimer(CALLBACK(src, PROC_REF(gib), null, null, TRUE, TRUE), 25)
+	addtimer(CALLBACK(src, PROC_REF(gib), DROP_BRAIN|DROP_ORGANS|DROP_ITEMS), 25)
 	var/matrix/M = matrix()
 	M.Scale(1.8, 1.2)
 	animate(src, time = 40, transform = M, easing = SINE_EASING)
@@ -28,9 +28,9 @@
 	add_memory_in_range(src, 7, /datum/memory/witness_gib, protagonist = src)
 	if(drop_bitflags & DROP_ITEMS)
 		for(var/obj/item/W in src)
-			dropItemToGround(W)
-			if(prob(50))
-				step(W, pick(GLOB.alldirs))
+			if(dropItemToGround(W))
+				if(prob(50))
+					step(W, pick(GLOB.alldirs))
 	var/atom/Tsec = drop_location()
 	for(var/mob/M in src)
 		M.forceMove(Tsec)

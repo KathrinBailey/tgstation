@@ -113,7 +113,7 @@
 	atom_storage.max_specific_storage = WEIGHT_CLASS_SMALL
 	atom_storage.max_slots = 10
 	atom_storage.max_total_storage = 20
-	atom_storage.set_holdable(list(/obj/item/clothing/accessory/medal))
+	atom_storage.set_holdable(/obj/item/clothing/accessory/medal)
 
 /obj/item/storage/lockbox/medal/examine(mob/user)
 	. = ..()
@@ -249,6 +249,7 @@
 	. = ..()
 	buyer_account = _buyer_account
 	ADD_TRAIT(src, TRAIT_NO_MISSING_ITEM_ERROR, TRAIT_GENERIC)
+	ADD_TRAIT(src, TRAIT_NO_MANIFEST_CONTENTS_ERROR, TRAIT_GENERIC)
 
 /obj/item/storage/lockbox/order/attackby(obj/item/W, mob/user, params)
 	var/obj/item/card/id/id_card = W.GetID()
